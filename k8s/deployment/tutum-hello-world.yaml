@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: hello-world
+  name: hello-world
+  namespace: hackapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-world
+  template:
+    metadata:
+      labels:
+        app: hello-world
+    spec:
+      containers:
+      - image: tutum/hello-world:latest
+        imagePullPolicy: IfNotPresent
+        name: maci-hello-world
+        ports:
+        - containerPort: 80
+          protocol: TCP
+      terminationGracePeriodSeconds: 30

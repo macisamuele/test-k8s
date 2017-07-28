@@ -1,0 +1,41 @@
+#!/bin/bash
+set -eu
+set -o pipefail
+
+echo_stderr() {
+	echo "${@}" > /dev/stderr
+}
+
+echo_stderr Start $(hostname)
+echo_stderr OS Information
+echo_stderr $(cat /etc/os-release || echo "/etc/os-release not available!")
+
+# Scripts variable and aliases
+export RUNNER_NAME=${RUNNER_NAME:-$(hostname)}
+export gitlab_runner=/usr/bin/gitlab-runner
+pids=""
+
+# Ensure bash signal handling
+_term() { 
+  echo_stderr "Caught SIGTERM signal! Forwarding to pids: ${pids}."
+  # Ensure that ${pids} is not an empty string
+  [[ ! -z ${pids} ]] && kill -TERM "${pids}" 2>/dev/null
+  echo_stderr "Deregistering runner ${RUNNER_NAME}"
+  ${gitlab_runner} unregister -n ${RUNNER_NAME}
+}
+trap _term SIGTERM
+
+# Register runner
+# /usr/bin/gitlab-runner register
+echo_stderr Register runner ${RUNNER_NAME}
+${gitlab_runner} register
+
+# Start runner
+echo_stderr Start default entrypoint
+/entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner &
+
+pids=$!
+
+wait ${pids}
+
+echo_stderr Stop $(hostname)

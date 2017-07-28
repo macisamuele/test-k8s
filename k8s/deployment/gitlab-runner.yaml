@@ -1,0 +1,107 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: gitlab-runner
+  labels: 
+    team: dev-ops
+    app: gitlab-runner
+  namespace: hackapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      team: dev-ops
+      app: gitlab-runner
+  template:
+    metadata:
+      labels: 
+        team: dev-ops
+        app: gitlab-runner
+    spec:
+      containers:
+      - image: hackapp/gitlab-runner:v9.4.1
+        imagePullPolicy: IfNotPresent
+        name: gitlab-runner
+        command: [
+          "/usr/bin/dumb-init", "/custom-entrypoint",
+        ]
+        volumeMounts:
+        - name: kubernetes-secret-volume
+          mountPath: /etc/ssl/kubernetes/
+        env:
+        - name: REGISTRATION_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: registration.token
+        - name: CI_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: ci.server.url
+        - name: RUNNER_TAG_LIST
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: runner.tag.list
+        - name: RUNNER_REQUEST_CONCURRENCY
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: runner.request.concurrency
+        - name: REGISTER_NON_INTERACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: register.non.interactive
+        - name: REGISTER_LOCKED
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: register.locked
+        - name: REGISTER_RUN_UNTAGGED
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: register.run.untagged
+        - name: RUNNER_EXECUTOR
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: runner.executor
+        - name: KUBERNETES_CERT_FILE
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: kubernetes.cert.file
+        - name: KUBERNETES_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: kubernetes.host
+        - name: KUBERNETES_KEY_FILE
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: kubernetes.key.file
+        - name: KUBERNETES_CA_FILE
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: kubernetes.ca.file
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: kubernetes.namespace
+        - name: KUBERNETES_PRIVILEGED
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: kubernetes.privileged
+          # To Activate you need to update registration.token configuration and connect manually
+          # on the docker container and run `gitlab-runner register`
+      volumes:
+      - name: kubernetes-secret-volume
+        secret:
+          secretName: kubernetes-certificates
