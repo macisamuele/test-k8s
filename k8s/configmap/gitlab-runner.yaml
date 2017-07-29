@@ -8,7 +8,7 @@ metadata:
   namespace: hackapp
 data:
   CI_SERVER_URL: http://gitlab.hackapp.svc.cluster.local
-  RUNNER_TAG_LIST: docker, deploy, test
+  RUNNER_TAG_LIST: kubernetes, docker, deploy, test
 
   RUNNER_REQUEST_CONCURRENCY: '4'
   REGISTER_NON_INTERACTIVE: 'true'
@@ -21,4 +21,5 @@ data:
   KUBERNETES_KEY_FILE: /etc/ssl/kubernetes/apiserver.key
   KUBERNETES_CA_FILE: /etc/ssl/kubernetes/ca.crt
   KUBERNETES_NAMESPACE: hackapp-ci
+  KUBERNETES_PULL_POLICY: if-not-present
   KUBERNETES_PRIVILEGED: 'true' # NOTE: this could have negative impact on security!
