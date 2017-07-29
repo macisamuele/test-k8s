@@ -2,10 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: gitlab-runner-config
+  labels: 
+    team: dev-ops
+    app: gitlab
   namespace: hackapp
 data:
-  REGISTRATION_TOKEN: 5J9_7cGphVXN9qm84rJ8  # Token retrieved by <gitlab>/admin/runners
-
   CI_SERVER_URL: http://gitlab.hackapp.svc.cluster.local
   RUNNER_TAG_LIST: docker, deploy, test
 

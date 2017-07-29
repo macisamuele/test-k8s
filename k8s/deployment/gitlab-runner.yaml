@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: gitlab-runner
@@ -22,16 +22,36 @@ spec:
       - image: hackapp/gitlab-runner:v9.4.1
         imagePullPolicy: IfNotPresent
         name: gitlab-runner
-        command: [
-          "/usr/bin/dumb-init", "/custom-entrypoint",
-        ]
-        volumeMounts:
-        - name: kubernetes-secret-volume
-          mountPath: /etc/ssl/kubernetes/
+        env:
+        - name: REGISTRATION_TOKEN
+          # Using gitlab secrets to get the initial token
+          valueFrom:
+            secretKeyRef:
+              name: gitlab-secret
+              key: runners.token
         envFrom:
         - configMapRef:
             name: gitlab-runner-config
+        volumeMounts:
+        - name: kubernetes-secret-volume
+          readOnly: true
+          mountPath: /etc/ssl/kubernetes/
       volumes:
       - name: kubernetes-secret-volume
         secret:
           secretName: kubernetes-certificates
+    
+      # Ensure that gitlab (CI_SERVER_URL) is reachable before starting the base pod
+      initContainers:
+      - name: init-myservice
+        image: busybox:1.27.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: gitlab-runner-config
+              key: CI_SERVER_URL
+        - name: TIMEOUT_S
+          value: '120'
+        command: ['/bin/sh', '-c', 'timeout -t ${TIMEOUT_S} sh -c "until wget -O - ${SERVICE} &> /dev/null; do echo Waiting for ${SERVICE}; sleep 1; done"']

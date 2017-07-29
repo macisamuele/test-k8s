@@ -1,30 +1,27 @@
 #!/bin/bash
 set -eu
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# To apply all the configs regardless of the order you can run something similar to
-# for config_dir in namespace configmap secret persistentvolumeclaim deployment service
-# do
-#     # Ensure that kubectl commands are executed on directories with configurations
-#     [[ ! -z `find ${config_dir}/ -name "*.yaml" -o -name "*.yml" -o -name "*.json"` ]] && \
-#         kubectl create -f ${config_dir}
-# done
+cd ${DIR}
 
-# Generate kubernetes-certificates.yaml
+# Generate kubernetes-certificates.json
 python secret/generate_kubernetes_certificates_minikube.py hackapp kubernetes-certificates
 
-# Generate namespaces (hackapp and hackapp-ci)
-kubectl create -f namespace/
+# To apply all the configs regardless of the order you can run something similar to
+for config_dir in namespace configmap secret persistentvolumeclaim deployment service
+do
+    # Ensure that kubectl commands are executed on directories with configurations
+    [[ ! -z `find ${config_dir}/ -name "*.yaml" -o -name "*.yml" -o -name "*.json"` ]] && \
+        kubectl create -f ${config_dir}
+done
 
-# Generate secret
-kubectl create -f secret/
 
-# Generate deployment (NOTE: It's wanted the exclusion of deployment/gitlab-runner.yaml)
-kubectl create -f deployment/gitlab.yaml -f deployment/tutum-hello-world.yaml
+minikube addons enable heapster
+minikube addons enable registry
 
-# Generate service
-kubectl create -f service/
+minikube dashboard
 
-echo """
-Please update deployment/gitlab-runner.yaml with the token provided by gitlab ($(minikube service -n hackapp gitlab --url | head -n 1))
-and then run ``kubectl create -f configmap/gitlab-runner.yaml -f deployment/gitlab-runner.yaml``
-"""
+echo "Cluster running on $(minikube ip)"
+
+cd -
+
