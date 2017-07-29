@@ -4,20 +4,20 @@ metadata:
   name: gitlab-runner-config
   namespace: hackapp
 data:
-  registration.token: 5J9_7cGphVXN9qm84rJ8  # Token retrieved by <gitlab>/admin/runners
+  REGISTRATION_TOKEN: 5J9_7cGphVXN9qm84rJ8  # Token retrieved by <gitlab>/admin/runners
 
-  ci.server.url: http://gitlab.hackapp.svc.cluster.local
-  runner.tag.list: deploy, test
+  CI_SERVER_URL: http://gitlab.hackapp.svc.cluster.local
+  RUNNER_TAG_LIST: docker, deploy, test
 
-  runner.request.concurrency: '4'
-  register.non.interactive: 'true'
-  register.locked: 'false'
-  register.run.untagged: 'true'
+  RUNNER_REQUEST_CONCURRENCY: '4'
+  REGISTER_NON_INTERACTIVE: 'true'
+  REGISTER_LOCKED: 'false'
+  REGISTER_RUN_UNTAGGED: 'true'
 
-  runner.executor: kubernetes
-  kubernetes.host: kubernetes.default.svc.cluster.local
-  kubernetes.cert.file: /etc/ssl/kubernetes/apiserver.crt
-  kubernetes.key.file: /etc/ssl/kubernetes/apiserver.key
-  kubernetes.ca.file: /etc/ssl/kubernetes/ca.crt
-  kubernetes.namespace: hackapp-ci
-  kubernetes.privileged: 'true' # NOTE: this could have negative impact on security!
+  RUNNER_EXECUTOR: kubernetes
+  KUBERNETES_HOST: kubernetes.default.svc.cluster.local
+  KUBERNETES_CERT_FILE: /etc/ssl/kubernetes/apiserver.crt
+  KUBERNETES_KEY_FILE: /etc/ssl/kubernetes/apiserver.key
+  KUBERNETES_CA_FILE: /etc/ssl/kubernetes/ca.crt
+  KUBERNETES_NAMESPACE: hackapp-ci
+  KUBERNETES_PRIVILEGED: 'true' # NOTE: this could have negative impact on security!
