@@ -22,19 +22,9 @@ spec:
       - image: gitlab/gitlab-ce:9.4.1-ce.0
         imagePullPolicy: IfNotPresent
         name: gitlab
-        env:
-        - name: GITLAB_ROOT_PASSWORD
-          value: password
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: GITLAB_OMNIBUS_CONFIG
-          value: external_url 'http://$(POD_NAME).$(POD_NAMESPACE).svc.cluster.local'
+        envFrom:
+        - configMapRef:
+            name: gitlab-config
         ports:
         - containerPort: 80
           protocol: TCP
