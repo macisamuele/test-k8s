@@ -16,6 +16,8 @@ fi
 if ! hash docker 2> /dev/null
 then
     echo "Installing docker"
+    sudo mkdir -p /etc/docker
+    sudo bash -c "echo '{\"storage-driver\": \"overlay2\"}' > /etc/docker/daemon.json"
     sudo apt-get update && \
     sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && \
